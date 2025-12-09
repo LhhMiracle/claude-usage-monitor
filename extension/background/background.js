@@ -27,6 +27,7 @@ chrome.runtime.onInstalled.addListener(() => {
     if (!result.config) {
       chrome.storage.local.set({
         config: {
+          accountName: '', // 账号名称（用于区分多个账号）
           serverChanKey: '', // Server酱 SCKEY
           firebaseConfig: null,
           notifyThreshold: NOTIFY_THRESHOLD,
@@ -163,6 +164,12 @@ function buildNotificationMessage(data) {
 
   lines.push('━━━━━━━━━━━━━');
   lines.push('⏰ Claude 使用最佳时机！');
+
+  // 显示账号名称
+  if (data.accountDisplayName && data.accountDisplayName !== 'account_default') {
+    lines.push(`📱 账号：${data.accountDisplayName}`);
+  }
+
   lines.push('');
 
   // 使用时间戳实时计算剩余时间

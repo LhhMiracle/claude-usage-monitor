@@ -6,6 +6,7 @@ console.log('Popup 已加载');
 const elements = {
   accountSelector: document.getElementById('accountSelector'),
   accountSelect: document.getElementById('accountSelect'),
+  accountName: document.getElementById('accountName'),
   currentSession: document.getElementById('currentSession'),
   currentSessionBar: document.getElementById('currentSessionBar'),
   weeklyLimits: document.getElementById('weeklyLimits'),
@@ -254,6 +255,7 @@ function loadConfig() {
   chrome.storage.local.get(['config'], (result) => {
     if (result.config) {
       const config = result.config;
+      elements.accountName.value = config.accountName || '';
       elements.serverChanKey.value = config.serverChanKey || '';
       elements.notifyThreshold.value = config.notifyThreshold || 60;
       elements.enableNotifications.checked = config.enableNotifications !== false;
@@ -302,7 +304,17 @@ function setupEventListeners() {
 
   // 保存配置
   elements.saveConfigBtn.addEventListener('click', () => {
+    const accountName = elements.accountName.value.trim();
+
+    // 验证账号名称必填
+    if (!accountName) {
+      alert('请填写账号名称！\n\n建议使用：Mac账号、Win账号等，用于区分不同设备。');
+      elements.accountName.focus();
+      return;
+    }
+
     const config = {
+      accountName: accountName,
       serverChanKey: elements.serverChanKey.value.trim(),
       notifyThreshold: parseInt(elements.notifyThreshold.value) || 60,
       enableNotifications: elements.enableNotifications.checked,

@@ -152,13 +152,26 @@ async function readUsageData() {
     // 等待页面基本内容加载（等待包含 "Plan usage limits" 的文本）
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // 检测当前账号
-    const accountId = detectAccountEmail();
+    // 获取配置中的自定义账号名
+    const config = await new Promise(resolve => {
+      chrome.storage.local.get(['config'], (result) => {
+        resolve(result.config || {});
+      });
+    });
+
+    // 优先使用自定义账号名，否则尝试自动检测邮箱
+    const accountId = config.accountName || detectAccountEmail();
     console.log('当前账号:', accountId);
+
+    // 如果没有设置账号名称，提示用户
+    if (!config.accountName) {
+      console.warn('⚠️ 未设置账号名称！请在扩展设置中填写账号名称以区分不同账号。');
+    }
 
     const now = Date.now();
     const usageData = {
       accountId: accountId,  // 添加账号标识
+      accountDisplayName: config.accountName || accountId,  // 显示名称
       timestamp: now,
       lastSync: now,  // 添加上次同步时间
       currentSession: {
